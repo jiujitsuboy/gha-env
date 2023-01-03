@@ -10,8 +10,8 @@ jobs:
   test:
     env: #env variables available for this job and his steps
       MONGODB_CLUSTER_ADDRESS: cluster0.fgk39hm.mongodb.net/?retryWrites=true&w=majority
-      MONGODB_USERNAME: josenino
-      MONGODB_PASSWORD: 12345QWERT
+      MONGODB_USERNAME: ${{secrets.MONGODB_USERNAME}} # secrets is another context variable, in this case to access secrets configured in the repository
+      MONGODB_PASSWORD: ${{secrets.MONGODB_PASSWORD}} 
       PORT: 8080
     environment: testing
     runs-on: ubuntu-latest
@@ -30,11 +30,12 @@ jobs:
       - name: Run tests
         run: npm test
       - name: Output information
-        run: echo "MONGODB_DB_USERNAME-> ${{env.MONGODB_USERNAME}}"
+        run: | 
+          echo "MONGODB_DB_USERNAME: ${{env.MONGODB_USERNAME}}"
   deploy:
     needs: test
     runs-on: ubuntu-latest
     steps:
       - name: Output information
         run: |        
-          echo "..."
+          echo "MONGODB_DB_USERNAME: ${{env.MONGODB_USERNAME}}"

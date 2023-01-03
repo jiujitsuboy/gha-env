@@ -1,0 +1,40 @@
+name: Deployment
+on:
+  push:
+    branches:
+      - main
+      - dev
+env: # env variable available to all jobs in this workflow
+  MONGODB_DB_NAME: gha-demo
+jobs:
+  test:
+    env: #env variables available for this job and his steps
+      MONGODB_CLUSTER_ADDRESS: cluster0.fgk39hm.mongodb.net/?retryWrites=true&w=majority
+      MONGODB_USERNAME: josenino
+      MONGODB_PASSWORD: 12345QWERT
+      PORT: 8080
+    environment: testing
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Code
+        uses: actions/checkout@v3
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: npm-deps-${{ hashFiles('**/package-lock.json') }}
+      - name: Install dependencies
+        run: npm ci
+      - name: Run server
+        run: npm start & npx wait-on http://127.0.0.1:$PORT
+      - name: Run tests
+        run: npm test
+      - name: Output information
+        run: echo "MONGODB_DB_USERNAME-> ${{env.MONGODB_USERNAME}}"
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Output information
+        run: |        
+          echo "..."
